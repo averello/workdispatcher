@@ -7,12 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DE63F643184AAC5E00CF2A52 /* helper.h in Headers */ = {isa = PBXBuildFile; fileRef = DE63F642184AAC5E00CF2A52 /* helper.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		DE63F645184AAC6100CF2A52 /* helper.c in Sources */ = {isa = PBXBuildFile; fileRef = DE63F644184AAC6100CF2A52 /* helper.c */; };
+		DE07E7051858D6E000AE3A9B /* operationQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = DE07E7041858D6E000AE3A9B /* operationQueue.c */; };
+		DE07E7181858DFE400AE3A9B /* testQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = DE07E7171858DFE400AE3A9B /* testQueue.c */; };
+		DE07E71B1858DFF200AE3A9B /* libworkdipatcher.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */; };
 		DE63F64E184AAD7500CF2A52 /* libmemorymanagement.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DE63F64B184AAD5900CF2A52 /* libmemorymanagement.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		DE07E7191858DFED00AE3A9B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE63F631184AAC0A00CF2A52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE63F638184AAC0A00CF2A52;
+			remoteInfo = workdipatcher;
+		};
 		DE63F64A184AAD5900CF2A52 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = DE63F646184AAD5900CF2A52 /* memorymanagement.xcodeproj */;
@@ -27,16 +35,45 @@
 			remoteGlobalIDString = DE89853C184A6C6E006C371B;
 			remoteInfo = memorymanagement;
 		};
+		DEB887DA1858D5B200D149F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE63F646184AAD5900CF2A52 /* memorymanagement.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DE14C30E184B7055008D6559;
+			remoteInfo = testMemoryManagement;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		DE07E70C1858DFCE00AE3A9B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		DE07E7041858D6E000AE3A9B /* operationQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = operationQueue.c; path = src/operationQueue.c; sourceTree = "<group>"; };
+		DE07E70E1858DFCE00AE3A9B /* testQueue */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testQueue; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE07E7171858DFE400AE3A9B /* testQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testQueue.c; path = test/testQueue.c; sourceTree = "<group>"; };
 		DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libworkdipatcher.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		DE63F642184AAC5E00CF2A52 /* helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = helper.h; path = include/helper.h; sourceTree = "<group>"; };
-		DE63F644184AAC6100CF2A52 /* helper.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = helper.c; path = src/helper.c; sourceTree = "<group>"; };
 		DE63F646184AAD5900CF2A52 /* memorymanagement.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = memorymanagement.xcodeproj; path = ../memorymanagement/memorymanagement.xcodeproj; sourceTree = "<group>"; };
+		DEB887D81858D5B100D149F4 /* operationQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = operationQueue.h; path = include/operationQueue.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		DE07E70B1858DFCE00AE3A9B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE07E71B1858DFF200AE3A9B /* libworkdipatcher.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DE63F636184AAC0A00CF2A52 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -48,12 +85,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		DE07E7071858DFA600AE3A9B /* test */ = {
+			isa = PBXGroup;
+			children = (
+				DE07E7171858DFE400AE3A9B /* testQueue.c */,
+			);
+			name = test;
+			sourceTree = "<group>";
+		};
 		DE63F630184AAC0A00CF2A52 = {
 			isa = PBXGroup;
 			children = (
 				DE63F646184AAD5900CF2A52 /* memorymanagement.xcodeproj */,
 				DE63F640184AAC2500CF2A52 /* include */,
 				DE63F641184AAC2B00CF2A52 /* src */,
+				DE07E7071858DFA600AE3A9B /* test */,
 				DE63F63A184AAC0A00CF2A52 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */,
+				DE07E70E1858DFCE00AE3A9B /* testQueue */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -69,7 +116,7 @@
 		DE63F640184AAC2500CF2A52 /* include */ = {
 			isa = PBXGroup;
 			children = (
-				DE63F642184AAC5E00CF2A52 /* helper.h */,
+				DEB887D81858D5B100D149F4 /* operationQueue.h */,
 			);
 			name = include;
 			sourceTree = "<group>";
@@ -77,7 +124,7 @@
 		DE63F641184AAC2B00CF2A52 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				DE63F644184AAC6100CF2A52 /* helper.c */,
+				DE07E7041858D6E000AE3A9B /* operationQueue.c */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -86,6 +133,7 @@
 			isa = PBXGroup;
 			children = (
 				DE63F64B184AAD5900CF2A52 /* libmemorymanagement.a */,
+				DEB887DB1858D5B200D149F4 /* testMemoryManagement */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -97,13 +145,30 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE63F643184AAC5E00CF2A52 /* helper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		DE07E70D1858DFCE00AE3A9B /* testQueue */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE07E7141858DFCE00AE3A9B /* Build configuration list for PBXNativeTarget "testQueue" */;
+			buildPhases = (
+				DE07E70A1858DFCE00AE3A9B /* Sources */,
+				DE07E70B1858DFCE00AE3A9B /* Frameworks */,
+				DE07E70C1858DFCE00AE3A9B /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DE07E71A1858DFED00AE3A9B /* PBXTargetDependency */,
+			);
+			name = testQueue;
+			productName = testQueue;
+			productReference = DE07E70E1858DFCE00AE3A9B /* testQueue */;
+			productType = "com.apple.product-type.tool";
+		};
 		DE63F638184AAC0A00CF2A52 /* workdipatcher */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DE63F63D184AAC0A00CF2A52 /* Build configuration list for PBXNativeTarget "workdipatcher" */;
@@ -150,6 +215,7 @@
 			projectRoot = "";
 			targets = (
 				DE63F638184AAC0A00CF2A52 /* workdipatcher */,
+				DE07E70D1858DFCE00AE3A9B /* testQueue */,
 			);
 		};
 /* End PBXProject section */
@@ -162,20 +228,40 @@
 			remoteRef = DE63F64A184AAD5900CF2A52 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		DEB887DB1858D5B200D149F4 /* testMemoryManagement */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = testMemoryManagement;
+			remoteRef = DEB887DA1858D5B200D149F4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
+		DE07E70A1858DFCE00AE3A9B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE07E7181858DFE400AE3A9B /* testQueue.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DE63F635184AAC0A00CF2A52 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE63F645184AAC6100CF2A52 /* helper.c in Sources */,
+				DE07E7051858D6E000AE3A9B /* operationQueue.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		DE07E71A1858DFED00AE3A9B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE63F638184AAC0A00CF2A52 /* workdipatcher */;
+			targetProxy = DE07E7191858DFED00AE3A9B /* PBXContainerItemProxy */;
+		};
 		DE63F64D184AAD7100CF2A52 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = memorymanagement;
@@ -184,6 +270,24 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		DE07E7151858DFCE00AE3A9B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		DE07E7161858DFCE00AE3A9B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		DE63F63B184AAC0A00CF2A52 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -281,6 +385,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		DE07E7141858DFCE00AE3A9B /* Build configuration list for PBXNativeTarget "testQueue" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE07E7151858DFCE00AE3A9B /* Debug */,
+				DE07E7161858DFCE00AE3A9B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		DE63F634184AAC0A00CF2A52 /* Build configuration list for PBXProject "workdipatcher" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
