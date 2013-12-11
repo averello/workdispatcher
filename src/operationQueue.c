@@ -24,6 +24,25 @@ void WDOperationQueuePopAndPerform(WDOperationQueue *restrict queue);
 
 void WDOperationPerform(WDOperation *restrict block);
 
+/*!
+ *  @struct _wd_operation_t
+ *  @brief An operation structure.
+ *  @ingroup wd
+ *
+ *	Overview
+ *	========
+ *  `WDOperation` is an opaque structure used to encapsulate the code and data associated with a single task. An operation object is a run-once object that is, it executes its task once and cannot be used to execute it again. You typically execute operations by adding them to an operation queue (@ref WDOperationQueue). An operation queue executes its operations directly on its proper thread.
+ *
+ *	Responding to cancel {#respondingToCancel}
+ *	====================
+ *	@par
+ *	Once you add an operation to a queue, the operation is out of your hands. The queue takes over and handles the scheduling of that task. However, if you decide later that you do not want to execute the operation after all, you can cancel the operation to prevent it from consuming CPU time needlessly. You do this by calling the @ref WDOperationCancel function with the operation object itself or by calling the @ref WDOperationQueueCancelAllOperations function with the @ref WDOperationQueue.
+ *
+ *	@par
+ *	Canceling an operation does not immediately force it to stop what it is doing. Although respecting the value returned by the @ref WDOperationGetFlags function is expected of all operations, your code must explicitly check the value returned by this function and abort as needed. The default implementation of @ref WDOperationQueue does include checks for cancellation. For example, if you cancel an operation before is started, the operation is never executed.
+ *	@par
+ *	You should always support cancellation semantics in any custom code you write. In particular, your main task code should periodically check the value of the @ref WDOperationGetFlags function. If the flags ever returns contains true for `canceled`, your operation object should clean up and exit as quickly as possible.
+ */
 struct _wd_operation_t {
 	wd_operation_f queuef;
 	void *argument;

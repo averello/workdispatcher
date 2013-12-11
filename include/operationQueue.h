@@ -9,6 +9,10 @@
  *  @copyright Copyright (c) 2013 George Boumis <developer.george.boumis@gmail.com>. All rights reserved.
  *
  *  @defgroup wd Work Dispatch Module
+ *
+ *	@mainpage Work Dispath Documentation
+ *	@section intro_sec Introduction
+ *	A little library in `C` for managing task with operations via an operation queue interface. See @ref wd for documentation of this library.
  */
 
 #ifndef workdipatcher_dispatch_h
