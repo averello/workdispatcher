@@ -78,6 +78,11 @@ WDOperationQueue *WDOperationQueueAllocate(void) {
 	pthread_cond_init(&queue->suspend.condition, NULL);
 	MEMORY_MANAGEMENT_ATTRIBUTE_SET_DEALLOC_FUNCTION(queue, WDOperationQueueDealloc);
 	
+	size_t size = (size_t)snprintf(NULL, 0, "WDOperationQueue %p", queue);
+	char *name = calloc(size+1, sizeof(char));
+	snprintf(name, size+1, "WDOperationQueue %p", queue);
+	queue->name = name;
+	
 	pthread_create(&queue->thread, NULL, WDOperationQueueThreadF, queue);
 	
 	return queue;
@@ -195,6 +200,7 @@ void WDOperationQueuePopAndPerform(WDOperationQueue *restrict queue) {
 	if (queue == NULL) { errno = EINVAL; return; }
 	WDOperation *operation = WDOperationQueuePopOperation(queue);
 	WDOperationPerform(operation);
+	operation->queue = NULL;
 	release(operation);
 }
 
