@@ -27,6 +27,7 @@ extern "C" {
  *  @brief An operation structure.
  *  @ingroup wd
  *
+ *
  *	Overview
  *	========
  *  `WDOperation` is an opaque structure used to encapsulate the code and data associated with a single task. An operation object is a run-once object that is, it executes its task once and cannot be used to execute it again. You typically execute operations by adding them to an operation queue (@ref WDOperationQueue). An operation queue executes its operations directly on its proper thread.

@@ -26,32 +26,18 @@ void WDOperationPerform(WDOperation *restrict block);
 
 /*!
  *  @struct _wd_operation_t
- *  @brief An operation structure.
+ *  @brief The operation structure.
  *  @ingroup wd
- *
- *	Overview
- *	========
- *  `WDOperation` is an opaque structure used to encapsulate the code and data associated with a single task. An operation object is a run-once object that is, it executes its task once and cannot be used to execute it again. You typically execute operations by adding them to an operation queue (@ref WDOperationQueue). An operation queue executes its operations directly on its proper thread.
- *
- *	Responding to cancel {#respondingToCancel}
- *	====================
- *	@par
- *	Once you add an operation to a queue, the operation is out of your hands. The queue takes over and handles the scheduling of that task. However, if you decide later that you do not want to execute the operation after all, you can cancel the operation to prevent it from consuming CPU time needlessly. You do this by calling the @ref WDOperationCancel function with the operation object itself or by calling the @ref WDOperationQueueCancelAllOperations function with the @ref WDOperationQueue.
- *
- *	@par
- *	Canceling an operation does not immediately force it to stop what it is doing. Although respecting the value returned by the @ref WDOperationGetFlags function is expected of all operations, your code must explicitly check the value returned by this function and abort as needed. The default implementation of @ref WDOperationQueue does include checks for cancellation. For example, if you cancel an operation before is started, the operation is never executed.
- *	@par
- *	You should always support cancellation semantics in any custom code you write. In particular, your main task code should periodically check the value of the @ref WDOperationGetFlags function. If the flags ever returns contains true for `canceled`, your operation object should clean up and exit as quickly as possible.
  */
 struct _wd_operation_t {
-	wd_operation_f queuef;
-	void *argument;
-	WDOperationQueue *queue;
+	wd_operation_f queuef; /*!< the operation's function */
+	void *argument; /*!< the operation's argument */
+	WDOperationQueue *queue; /*!< the associated queue that launched this operation */
 	struct _wd_operation_wait_t {
 		pthread_mutex_t mutex;
 		pthread_cond_t condition;
-	} wait;
-	wd_operation_flags_t flags;
+	} wait; /*!< the associated data for use with @ref WDOperationWaitUntilFinished */
+	wd_operation_flags_t flags; /*!< the flags of the operations */
 };
 
 struct _list_item {
@@ -59,26 +45,31 @@ struct _list_item {
 	TAILQ_ENTRY(_list_item) items;
 };
 
+/*!
+ *  @struct _wd_operation_queue_t
+ *  @brief The operation queue structure.
+ *  @ingroup wd
+ */
 struct _wd_operation_queue_t {
-	TAILQ_HEAD(ListHead, _list_item) operations;
+	TAILQ_HEAD(ListHead, _list_item) operations; /*!< the operation list */
+
+	const char *name; /*!< the name of the operation queue */
+	pthread_t thread; /*!< the operations queue's private thread */
 	
-	const char *name;
-	
-	pthread_t thread;
 	struct _wd_operation_queue_guard_t {
 		pthread_mutex_t mutex;
 		pthread_cond_t condition;
-	} guard;
+	} guard; /*!< the data used for thread safety */
 
 	struct _wd_operation_queue_suspend_t {
 		pthread_mutex_t mutex;
 		pthread_cond_t condition;
-	} suspend;
+	} suspend; /*!< the data associated to suspend operations */
 	
 	struct _wd_operation_queue_flags_t {
-		unsigned int stop:1;
-		unsigned int suspend:1;
-	} flags;
+		unsigned int stop:1; /*!< indicates whether the queue should stop and not to shcedule any further operations for execution */
+		unsigned int suspend:1; /*!< indicates whether the queue is suspended */
+	} flags; /*!< the flags of the operations */
 	
 };
 
@@ -121,6 +112,8 @@ void WDOperationQueueDealloc(void *_queue) {
 	
 	if (NULL != queue->name)
 		free((void *)queue->name);
+	
+	pthread_join(queue->thread, NULL);
 	
 	pthread_mutex_destroy(&queue->guard.mutex);
 	pthread_cond_destroy(&queue->guard.condition);
@@ -245,7 +238,9 @@ void WDOperationQueueWaitAllOperations(WDOperationQueue *queue) {
 }
 
 
+/**************/
 /* Operations */
+/**************/
 
 WDOperation *WDOperationAllocate(const wd_operation_f function, void *restrict argument) {
 	if ( function == NULL ) return errno = EINVAL, (WDOperation *)NULL;
