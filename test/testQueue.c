@@ -12,6 +12,8 @@
 #include "operationQueue.h"
 #include <memory_management/memory_management.h>
 
+#define ITER 10
+
 void opf(WDOperation *operation, void *arg);
 
 int main () {
@@ -19,21 +21,30 @@ int main () {
 	WDOperationQueue *operationQueue = WDOperationQueueAllocate();
 	WDOperationQueueSetName(operationQueue, "queue.name");
 	
-	WDOperation *operation = WDOperationAllocate(opf, string);
-	WDOperationQueueAddOperation(operationQueue, operation);
+	//for (unsigned int i=0; i<ITER; i++) {
+		WDOperation *operation = WDOperationAllocate(opf, string);
+		WDOperationQueueAddOperation(operationQueue, operation);
+		release(operation);
+	//}
 	
 	
 	WDOperationQueueWaitAllOperations(operationQueue);
-	release(operation);
 	release(operationQueue);
 	return 0;
 }
 
 void opf(WDOperation *operation, void *arg) {
+	static int i=0;
 	char *string = arg;
-	sleep(2);
+	sleep(1);
 	puts(string);
-	puts(WDOperationQueueGetName(WDOperationCurrentOperationQueue(operation)));
+	WDOperationQueue *queue = WDOperationCurrentOperationQueue(operation);
+	puts(WDOperationQueueGetName(queue));
+	if (i++<ITER) {
+		WDOperation *operation = WDOperationAllocate(opf, string);
+		WDOperationQueueAddOperation(queue, operation);
+		release(operation);
+	}
 	return;
 }
 
