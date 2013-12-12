@@ -162,3 +162,4 @@ doc/Doxyfile.warnings
 *.o
 *.a
 *.so
+bin
