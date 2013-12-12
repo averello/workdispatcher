@@ -16,6 +16,13 @@
 #include <memory_management/memory_management.h>
 #include "operationQueue.h"
 
+#ifndef TAILQ_FOREACH_SAFE
+#define TAILQ_FOREACH_SAFE(var, head, field, tvar)          \
+    for ((var) = TAILQ_FIRST((head));               \
+        (var) && ((tvar) = TAILQ_NEXT((var), field), 1);        \
+        (var) = (tvar))
+#endif
+
 void WDOperationDealloc(void *block);
 void WDOperationQueueDealloc(void *queue);
 void *WDOperationQueueThreadF(void *args);
@@ -55,6 +62,8 @@ struct _wd_operation_queue_t {
 
 	const char *name; /*!< the name of the operation queue */
 	pthread_t thread; /*!< the operations queue's private thread */
+
+	WDOperation *executingOperation;
 	
 	struct _wd_operation_queue_guard_t {
 		pthread_mutex_t mutex;
@@ -88,9 +97,9 @@ WDOperationQueue *WDOperationQueueAllocate(void) {
 	pthread_cond_init(&queue->suspend.condition, NULL);
 	MEMORY_MANAGEMENT_ATTRIBUTE_SET_DEALLOC_FUNCTION(queue, WDOperationQueueDealloc);
 	
-	size_t size = (size_t)snprintf(NULL, 0, "WDOperationQueue %p", queue);
+	size_t size = (size_t)snprintf(NULL, 0, "WDOperationQueue %p", (void *)queue);
 	char *name = calloc(size+1, sizeof(char));
-	snprintf(name, size+1, "WDOperationQueue %p", queue);
+	snprintf(name, size+1, "WDOperationQueue %p", (void *)queue);
 	queue->name = name;
 	
 	pthread_create(&queue->thread, NULL, WDOperationQueueThreadF, queue);
@@ -105,6 +114,7 @@ void WDOperationQueueDealloc(void *_queue) {
 
 	struct _list_item *item, *tmp;
 	TAILQ_FOREACH_SAFE(item, &queue->operations, items, tmp) {
+		if (NULL == item) break;
 		TAILQ_REMOVE(&queue->operations, item, items);
 		release(item->operation);
 		release(item);
@@ -113,6 +123,10 @@ void WDOperationQueueDealloc(void *_queue) {
 	if (NULL != queue->name)
 		free((void *)queue->name);
 	
+	if (queue->executingOperation==NULL)
+		pthread_cancel(queue->thread);
+	else
+		WDOperationCancel(queue->executingOperation);
 	pthread_join(queue->thread, NULL);
 	
 	pthread_mutex_destroy(&queue->guard.mutex);
@@ -195,8 +209,11 @@ WDOperation *WDOperationQueuePopOperation(WDOperationQueue *restrict queue) {
 	WDOperation *operation = NULL;
 	
 	int isEmpty = TAILQ_EMPTY(&queue->operations);
-	if (isEmpty)
+	if (isEmpty) {
 		pthread_cond_wait(&queue->guard.condition, &queue->guard.mutex);
+		isEmpty = TAILQ_EMPTY(&queue->operations);
+		if (isEmpty) return pthread_mutex_unlock(&(queue->guard.mutex)), (WDOperation *)NULL;
+	}
 	
 	struct _list_item *item = TAILQ_FIRST(&queue->operations);
 	if ( item == NULL ) return pthread_mutex_unlock(&(queue->guard.mutex)), (WDOperation *)NULL;
@@ -271,8 +288,10 @@ void WDOperationPerform(WDOperation *restrict operation) {
 	
 	if (!operation->flags.canceled) {
 		operation->flags.executing = 1;
+		operation->queue->executingOperation = operation;
 		operation->queuef(operation, (void *)operation->argument);
 		operation->flags.executing = 0;
+		operation->queue->executingOperation = NULL;
 	}
 	
 	pthread_mutex_lock(&operation->wait.mutex);
