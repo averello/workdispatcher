@@ -30,7 +30,7 @@ extern "C" {
  *
  *	Overview
  *	========
- *  `WDOperation` is an opaque structure used to encapsulate the code and data associated with a single task. An operation object is a run-once object that is, it executes its task once and cannot be used to execute it again. You typically execute operations by adding them to an operation queue (@ref WDOperationQueue). An operation queue executes its operations directly on its proper thread.
+ *  `WDOperation` is an opaque structure used to encapsulate the code and data associated with a single task. An operation object is a run-once object that is, it executes its task once and cannot be used to execute it again. You typically execute operations by adding them to an operation queue (@ref WDOperationQueue). An operation queue executes its operations directly on **its proper thread**.
  *
  *	Responding to cancel {#respondingToCancel}
  *	====================
@@ -84,6 +84,7 @@ typedef void (*wd_operation_f) (WDOperation *operation, void *argument);
  *  @fn WDOperation *WDOperationAllocate(const wd_operation_f function, void *restrict argument)
  *  @brief Creates an operation.
  *  @ingroup wd
+ *	@details The argument of the operation is retained (see [libmemorymanagement](https://github.com/averello/memorymanagement)). If the argument is not allocated (managed) by the [libmemorymanagement](https://github.com/averello/memorymanagement) then *you* have to make *sure* that this pointer does not gets freed before the execution of the operation by the operation queue.
  *	@param[in] function the function that the operation will execute
  *	@param[in,out] argument the argument to pass when executing the operation's function
  *	@returns an initialized @ref WDOperation object.
@@ -151,8 +152,9 @@ WDOperationQueue *WDOperationQueueAllocate(void);
  *  @fn int WDOperationQueueAddOperation(WDOperationQueue *restrict queue, WDOperation *restrict operation)
  *  @brief Adds the specified operation object to the queue.
  *  @ingroup wd
+ *	@details This function can be called from a currently running operation. This function is thread-safe.
  *	@param[in] queue the operation queue
- *	@param[in] operation The operation object to be added to the queue. In memory-managed applications, this object is retained by the operation queue.
+ *	@param[in] operation The operation object to be added to the queue. In memory-managed applications, this object is retained by the operation queue (see [libmemorymanagement](https://github.com/averello/memorymanagement)).
  *	@returns a boolean indicating whether the operation was correctly submitted to the operation queue
  */
 int WDOperationQueueAddOperation(WDOperationQueue *restrict queue, WDOperation *restrict operation);
@@ -168,7 +170,7 @@ void WDOperationQueueSuspend(WDOperationQueue *restrict queue, int choice);
 
 /*!
  *  @fn int WDOperationQueueIsSuspended(WDOperationQueue *restrict queue)
- *  @brief Returns whether the queueu is suspended or not.
+ *  @brief Returns whether the queue is suspended or not.
  *  @ingroup wd
  *	@param[in] queue the operation queue
  *	@returns Returns a Boolean value indicating whether the receiver is scheduling queued operations for execution.
