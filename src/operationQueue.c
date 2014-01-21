@@ -23,13 +23,13 @@
         (var) = (tvar))
 #endif
 
-void WDOperationDealloc(void *block);
-void WDOperationQueueDealloc(void *queue);
-void *WDOperationQueueThreadF(void *args);
-WDOperation *WDOperationQueuePopOperation(WDOperationQueue *restrict queue);
-void WDOperationQueuePopAndPerform(WDOperationQueue *restrict queue);
+void WDOperationDealloc(void *block) __attribute__((visibility("internal")));
+void WDOperationQueueDealloc(void *queue) __attribute__((visibility("internal")));
+void *WDOperationQueueThreadF(void *args) __attribute__((visibility("internal")));
+WDOperation *WDOperationQueuePopOperation(WDOperationQueue *restrict queue) __attribute__((visibility("internal")));
+void WDOperationQueuePopAndPerform(WDOperationQueue *restrict queue) __attribute__((visibility("internal")));
 
-void WDOperationPerform(WDOperation *restrict block);
+void WDOperationPerform(WDOperation *restrict block) __attribute__((visibility("internal")));
 
 /*!
  *  @struct _wd_operation_t
