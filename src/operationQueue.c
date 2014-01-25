@@ -133,6 +133,16 @@ void WDOperationQueueDealloc(void *_queue) {
 	pthread_cond_destroy(&queue->guard.condition);
 }
 
+WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *queue) {
+	if (NULL == queue) return NULL;
+	return retain(queue);
+}
+
+void WDOperationQueueRelease(WDOperationQueue *queue) {
+	if (NULL == queue) return;
+	release(queue);
+}
+
 void WDOperationQueueSetName(WDOperationQueue *queue, const char *name) {
 	if (NULL == queue) return;
 	if (NULL != queue->name)
@@ -259,7 +269,7 @@ void WDOperationQueueWaitAllOperations(WDOperationQueue *queue) {
 /* Operations */
 /**************/
 
-WDOperation *WDOperationAllocate(const wd_operation_f function, void *restrict argument) {
+WDOperation *WDOperationCreate(const wd_operation_f function, void *restrict argument) {
 	if ( function == NULL ) return errno = EINVAL, (WDOperation *)NULL;
 	
 	WDOperation *operation = MEMORY_MANAGEMENT_ALLOC(sizeof(WDOperation));
@@ -280,6 +290,16 @@ void WDOperationDealloc(void *_operation) {
 	pthread_mutex_destroy(&operation->wait.mutex);
 	pthread_cond_destroy(&operation->wait.condition);
 	release((void *)operation->argument);
+}
+
+WDOperation *WDOperationRetain(WDOperation *operation) {
+	if (NULL == operation) return NULL;
+	return retain(operation);
+}
+
+void WDOperationRelease(WDOperation *operation) {
+	if (NULL == operation) return;
+	release(operation);
 }
 
 void WDOperationPerform(WDOperation *restrict operation) {

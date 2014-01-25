@@ -81,7 +81,7 @@ typedef struct _wd_operation_flags_t {
 typedef void (*wd_operation_f) (WDOperation *operation, void *argument);
 
 /*!
- *  @fn WDOperation *WDOperationAllocate(const wd_operation_f function, void *restrict argument)
+ *  @fn WDOperation *WDOperationCreate(const wd_operation_f function, void *restrict argument)
  *  @brief Creates an operation.
  *  @ingroup wd
  *	@details The argument of the operation is retained (see [libmemorymanagement](https://github.com/averello/memorymanagement)). If the argument is not allocated (managed) by the [libmemorymanagement](https://github.com/averello/memorymanagement) then *you* have to make *sure* that this pointer does not gets freed before the execution of the operation by the operation queue.
@@ -89,7 +89,41 @@ typedef void (*wd_operation_f) (WDOperation *operation, void *argument);
  *	@param[in,out] argument the argument to pass when executing the operation's function
  *	@returns an initialized @ref WDOperation object.
  */
-WDOperation *WDOperationAllocate(const wd_operation_f function, void *restrict argument);
+WDOperation *WDOperationCreate(const wd_operation_f function, void *restrict argument);
+
+/*!
+ *  @fn WDOperation *WDOperationRetain(WDOperation *operation)
+ *  @brief Increments the retain count of a WDOperation.
+ *  @ingroup wd
+ *	@param[in] operation the operation to retain.
+ *	@returns the same you passed in as the @a operation parameter.
+ */
+WDOperation *WDOperationRetain(WDOperation *operation);
+	
+/*!
+ *  @fn void WDOperationRelease(WDOperation *operation)
+ *  @brief Decrements the retain count of a WDOperation.
+ *  @ingroup wd
+ *	@param[in] operation the operation to release.
+ */
+void WDOperationRelease(WDOperation *operation);
+
+/*!
+ *  @fn WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *queue)
+ *  @brief Increments the retain count of a WDOperationQueue.
+ *  @ingroup wd
+ *	@param[in] queue the operation to retain.
+ *	@returns the same you passed in as the @a queue parameter.
+ */
+WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *queue);
+	
+/*!
+ *  @fn void WDOperationRelease(WDOperation *operation)
+ *  @brief Decrements the retain count of a WDOperationQueue.
+ *  @ingroup wd
+ *	@param[in] queue the queue to release.
+ */
+void WDOperationQueueRelease(WDOperationQueue *queue);
 
 /*!
  *  @fn void WDOperationCancel(WDOperation *operation)
