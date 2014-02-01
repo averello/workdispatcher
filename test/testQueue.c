@@ -21,27 +21,41 @@ int main () {
 	WDOperationQueue *operationQueue = WDOperationQueueAllocate();
 	WDOperationQueueSetName(operationQueue, "queue.name");
 	
-	//for (unsigned int i=0; i<ITER; i++) {
-		WDOperation *operation = WDOperationAllocate(opf, string);
+	for (unsigned int i=0; i<ITER; i++) {
+		WDOperation *operation = WDOperationCreate(opf, string);
 		WDOperationQueueAddOperation(operationQueue, operation);
 		release(operation);
-	//}
+	}
 	
 	
 	WDOperationQueueWaitAllOperations(operationQueue);
+	
+	WDOperationQueueSuspend(operationQueue, 1);
+	WDOperation *fistoperation = NULL;
+	char *string2 = "hohohohho";
+	for (unsigned int i=0; i<ITER; i++) {
+		WDOperation *operation = WDOperationCreate(opf, string2);
+		WDOperationQueueAddOperation(operationQueue, operation);
+		if (i==0) fistoperation = operation;
+		release(operation);
+	}
+	
+	WDOperationQueueSuspend(operationQueue, 0);
+	WDOperationWaitUntilFinished(fistoperation);
 	release(operationQueue);
+//	memory_management_print_stats();
 	return 0;
 }
 
 void opf(WDOperation *operation, void *arg) {
 	static int i=0;
 	char *string = arg;
-	sleep(1);
+	usleep(50000);
 	puts(string);
 	WDOperationQueue *queue = WDOperationCurrentOperationQueue(operation);
 	puts(WDOperationQueueGetName(queue));
 	if (i++<ITER) {
-		WDOperation *operation = WDOperationAllocate(opf, string);
+		WDOperation *operation = WDOperationCreate(opf, string);
 		WDOperationQueueAddOperation(queue, operation);
 		release(operation);
 	}
