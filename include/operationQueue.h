@@ -105,6 +105,7 @@ WDOperation *WDOperationRetain(WDOperation *operation);
  *  @brief Decrements the retain count of a WDOperation.
  *  @ingroup wd
  *	@param[in] operation the operation to release.
+ *	@warning You should never release the operation from within its executing function. Doing so results in unexpected behavior and will probably crash the application.
  */
 void WDOperationRelease(WDOperation *operation);
 
@@ -122,6 +123,7 @@ WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *queue);
  *  @brief Decrements the retain count of a WDOperationQueue.
  *  @ingroup wd
  *	@param[in] queue the queue to release.
+ *	@warning You should never release the operation queue that executes an operation from within the operation. Doing so results in unexpected behavior and will probably crash the application.
  */
 void WDOperationQueueRelease(WDOperationQueue *queue);
 

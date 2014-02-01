@@ -23,6 +23,9 @@
         (var) = (tvar))
 #endif
 
+#define WDOperationQueueResultSuccess 0
+#define WDOperationQueueResultFailure 1
+
 void WDOperationDealloc(void *block) __attribute__((visibility("internal")));
 void WDOperationQueueDealloc(void *queue) __attribute__((visibility("internal")));
 void *WDOperationQueueThreadF(void *args) __attribute__((visibility("internal")));
@@ -110,8 +113,12 @@ WDOperationQueue *WDOperationQueueAllocate(void) {
 void WDOperationQueueDealloc(void *_queue) {
 	if (NULL == _queue) return;
 	WDOperationQueue *queue = _queue;
+	/* Indicate that the internal thread should stop */
+	pthread_mutex_lock(&queue->guard.mutex);
 	queue->flags.stop = 1;
+	pthread_mutex_unlock(&queue->guard.mutex);
 
+	/* Remove all pending operations, they will never be executed */
 	struct _list_item *item, *tmp;
 	TAILQ_FOREACH_SAFE(item, &queue->operations, items, tmp) {
 		if (NULL == item) break;
@@ -123,12 +130,21 @@ void WDOperationQueueDealloc(void *_queue) {
 	if (NULL != queue->name)
 		free((void *)queue->name);
 	
+	/* 
+	 If there is no operation running on the queue then cancel the thread
+	 This will has as result to wake up the thread that probably is
+	 blocked in a pthread_mutex_wait() call in WDOperationQueuePopAndPerform().
+	 */
 	if (queue->executingOperation==NULL)
 		pthread_cancel(queue->thread);
+	/* Otherwise cancel the running operation */
 	else
 		WDOperationCancel(queue->executingOperation);
+	
+	/* Wait the worker/internal thread to finish */
 	pthread_join(queue->thread, NULL);
 	
+	/* Clean up */
 	pthread_mutex_destroy(&queue->guard.mutex);
 	pthread_cond_destroy(&queue->guard.condition);
 }
@@ -165,29 +181,38 @@ void *WDOperationQueueThreadF(void *args) {
 		pthread_mutex_unlock(&queue->suspend.mutex);
 		WDOperationQueuePopAndPerform(queue);
 	}
+	/* If any operaitons are still in the queue then WDOperationQueueDealloc() will take care of them */
 	
+
 	return (void *)NULL;
 }
 
 int WDOperationQueueAddOperation(WDOperationQueue *restrict queue, WDOperation *restrict operation) {
-	if ( queue == NULL ) return errno = EINVAL, -1;
-	if ( operation == NULL ) return errno = EINVAL, -1;
-	if ( operation->queuef == NULL ) return errno = EINVAL, -1;
+	if ( queue == NULL ) return errno = EINVAL, -WDOperationQueueResultFailure;
+	if ( operation == NULL ) return errno = EINVAL, -WDOperationQueueResultFailure;
+	if ( operation->queuef == NULL ) return errno = EINVAL, -WDOperationQueueResultFailure;
+	
+	
 	
 	pthread_mutex_lock(&(queue->guard.mutex));
 	
+	/* If the queue is stoped then it should not accept new operations */
+	if (queue->flags.stop) return pthread_mutex_unlock(&(queue->guard.mutex)), errno = EINVAL, -WDOperationQueueResultFailure;
+	
 	int wasEmpty = TAILQ_EMPTY(&queue->operations);
 	struct _list_item *item = MEMORY_MANAGEMENT_ALLOC(sizeof(struct _list_item));
-	if ( item == NULL ) return pthread_mutex_unlock(&(queue->guard.mutex)), errno = ENOMEM, -1;
+	if ( item == NULL ) return pthread_mutex_unlock(&(queue->guard.mutex)), errno = ENOMEM, -WDOperationQueueResultFailure;
 	
+	/* Add the operation to the queue */
 	item->operation = retain(operation);
 	TAILQ_INSERT_TAIL(&(queue->operations), item, items);
 	operation->queue = queue;
 	
+	/* Inform that the queue is no more empty */
 	if (wasEmpty) pthread_cond_signal(&queue->guard.condition);
 	
 	pthread_mutex_unlock(&(queue->guard.mutex));
-	return 0;
+	return WDOperationQueueResultSuccess;
 }
 
 void WDOperationQueueSuspend(WDOperationQueue *restrict queue, int choice) {
@@ -199,8 +224,10 @@ void WDOperationQueueSuspend(WDOperationQueue *restrict queue, int choice) {
 		if (choice > 0)
 			queue->flags.suspend = 1;
 		else {
+			unsigned int wasSuspened = queue->flags.suspend;
 			queue->flags.suspend = 0;
-			pthread_cond_signal(&queue->suspend.condition);
+			if (wasSuspened)
+				pthread_cond_signal(&queue->suspend.condition);
 		}
 	}
 	
@@ -208,7 +235,7 @@ void WDOperationQueueSuspend(WDOperationQueue *restrict queue, int choice) {
 }
 
 int WDOperationQueueIsSuspended(WDOperationQueue *restrict queue) {
-	if (NULL == queue) return errno = EINVAL, -1;
+	if (NULL == queue) return errno = EINVAL, -WDOperationQueueResultFailure;
 	return queue->flags.suspend;
 }
 
@@ -219,12 +246,20 @@ WDOperation *WDOperationQueuePopOperation(WDOperationQueue *restrict queue) {
 	WDOperation *operation = NULL;
 	
 	int isEmpty = TAILQ_EMPTY(&queue->operations);
+	/* Block if there is no operation in the queue */
 	if (isEmpty) {
 		pthread_cond_wait(&queue->guard.condition, &queue->guard.mutex);
 		isEmpty = TAILQ_EMPTY(&queue->operations);
+		/* If the queue is still empty then the operation queue was stopped see WDOperationQueueDealloc() */
 		if (isEmpty) return pthread_mutex_unlock(&(queue->guard.mutex)), (WDOperation *)NULL;
 	}
+	/* If it was signaled and the queue is suspended it should*/
+	pthread_mutex_lock(&queue->suspend.mutex);
+	if (queue->flags.suspend)
+		return pthread_mutex_unlock(&queue->suspend.mutex), pthread_mutex_unlock(&(queue->guard.mutex)), NULL;
+	pthread_mutex_unlock(&queue->suspend.mutex);
 	
+	/* Remove the operation from the internal list */
 	struct _list_item *item = TAILQ_FIRST(&queue->operations);
 	if ( item == NULL ) return pthread_mutex_unlock(&(queue->guard.mutex)), (WDOperation *)NULL;
 	operation = (WDOperation *) item->operation;
@@ -232,6 +267,7 @@ WDOperation *WDOperationQueuePopOperation(WDOperationQueue *restrict queue) {
 	release(item);
 	
 	pthread_mutex_unlock(&(queue->guard.mutex));
+	/* Return the operation */
 	return operation;
 }
 
@@ -239,7 +275,6 @@ void WDOperationQueuePopAndPerform(WDOperationQueue *restrict queue) {
 	if (queue == NULL) { errno = EINVAL; return; }
 	WDOperation *operation = WDOperationQueuePopOperation(queue);
 	WDOperationPerform(operation);
-	operation->queue = NULL;
 	release(operation);
 }
 
@@ -306,18 +341,29 @@ void WDOperationPerform(WDOperation *restrict operation) {
 	if ( operation == NULL ) return;
 	if ( operation->queuef == NULL ) return;
 	
+	/* If the operation was not canceled */
 	if (!operation->flags.canceled) {
+		/* Indicate that it is executing */
 		operation->flags.executing = 1;
-		operation->queue->executingOperation = operation;
+		/* Associate the operation to the operation queue's executing operation */
+		operation->queue->executingOperation = retain(operation);
+		/* Execute the operation with its argument */
 		operation->queuef(operation, (void *)operation->argument);
+		/* Indicate that the operation is not executing any more */
 		operation->flags.executing = 0;
+		/* Disassociate the operation from the queue */
 		operation->queue->executingOperation = NULL;
+		release(operation);
 	}
 	
+
 	pthread_mutex_lock(&operation->wait.mutex);
+	/* Mark the operation as finished */
 	operation->flags.finished = 1;
+	/* Inform any one waiting in WDOperationWaitUntilFinished() call */
 	pthread_cond_broadcast(&operation->wait.condition);
 	pthread_mutex_unlock(&operation->wait.mutex);
+	operation->queue = NULL;
 }
 
 WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *operation) {
@@ -340,6 +386,7 @@ wd_operation_flags_t WDOperationGetFlags(WDOperation *operation) {
 void WDOperationWaitUntilFinished(WDOperation *operation) {
 	if (NULL == operation) return;
 	pthread_mutex_lock(&operation->wait.mutex);
+	/* Block if the operaiton is not finished */
 	if (!operation->flags.finished)
 		pthread_cond_wait(&operation->wait.condition, &operation->wait.mutex);
 	pthread_mutex_unlock(&operation->wait.mutex);
