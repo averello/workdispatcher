@@ -11,6 +11,8 @@
 		DE07E7181858DFE400AE3A9B /* testQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = DE07E7171858DFE400AE3A9B /* testQueue.c */; };
 		DE07E71B1858DFF200AE3A9B /* libworkdipatcher.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */; };
 		DE63F64E184AAD7500CF2A52 /* libmemorymanagement.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DE63F64B184AAD5900CF2A52 /* libmemorymanagement.a */; };
+		DEE46169189D274600E1D3E0 /* libworkdipatcher.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */; };
+		DEE4616F189D275700E1D3E0 /* testMainRunLoop.c in Sources */ = {isa = PBXBuildFile; fileRef = DEE46161189D271000E1D3E0 /* testMainRunLoop.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,10 +44,26 @@
 			remoteGlobalIDString = DE14C30E184B7055008D6559;
 			remoteInfo = testMemoryManagement;
 		};
+		DEE46165189D274600E1D3E0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE63F631184AAC0A00CF2A52 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE63F638184AAC0A00CF2A52;
+			remoteInfo = workdipatcher;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		DE07E70C1858DFCE00AE3A9B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		DEE4616A189D274600E1D3E0 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -63,6 +81,8 @@
 		DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libworkdipatcher.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE63F646184AAD5900CF2A52 /* memorymanagement.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = memorymanagement.xcodeproj; path = ../memorymanagement/memorymanagement.xcodeproj; sourceTree = "<group>"; };
 		DEB887D81858D5B100D149F4 /* operationQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = operationQueue.h; path = include/operationQueue.h; sourceTree = "<group>"; };
+		DEE46161189D271000E1D3E0 /* testMainRunLoop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testMainRunLoop.c; path = test/testMainRunLoop.c; sourceTree = "<group>"; };
+		DEE4616E189D274600E1D3E0 /* testQueue copy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "testQueue copy"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +102,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DEE46168189D274600E1D3E0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DEE46169189D274600E1D3E0 /* libworkdipatcher.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -89,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				DE07E7171858DFE400AE3A9B /* testQueue.c */,
+				DEE46161189D271000E1D3E0 /* testMainRunLoop.c */,
 			);
 			name = test;
 			sourceTree = "<group>";
@@ -109,6 +138,7 @@
 			children = (
 				DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */,
 				DE07E70E1858DFCE00AE3A9B /* testQueue */,
+				DEE4616E189D274600E1D3E0 /* testQueue copy */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -187,6 +217,24 @@
 			productReference = DE63F639184AAC0A00CF2A52 /* libworkdipatcher.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		DEE46163189D274600E1D3E0 /* testMainRunLoop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DEE4616B189D274600E1D3E0 /* Build configuration list for PBXNativeTarget "testMainRunLoop" */;
+			buildPhases = (
+				DEE46166189D274600E1D3E0 /* Sources */,
+				DEE46168189D274600E1D3E0 /* Frameworks */,
+				DEE4616A189D274600E1D3E0 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DEE46164189D274600E1D3E0 /* PBXTargetDependency */,
+			);
+			name = testMainRunLoop;
+			productName = testQueue;
+			productReference = DEE4616E189D274600E1D3E0 /* testQueue copy */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -216,6 +264,7 @@
 			targets = (
 				DE63F638184AAC0A00CF2A52 /* workdipatcher */,
 				DE07E70D1858DFCE00AE3A9B /* testQueue */,
+				DEE46163189D274600E1D3E0 /* testMainRunLoop */,
 			);
 		};
 /* End PBXProject section */
@@ -254,6 +303,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DEE46166189D274600E1D3E0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DEE4616F189D275700E1D3E0 /* testMainRunLoop.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -266,6 +323,11 @@
 			isa = PBXTargetDependency;
 			name = memorymanagement;
 			targetProxy = DE63F64C184AAD7100CF2A52 /* PBXContainerItemProxy */;
+		};
+		DEE46164189D274600E1D3E0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE63F638184AAC0A00CF2A52 /* workdipatcher */;
+			targetProxy = DEE46165189D274600E1D3E0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -408,6 +470,24 @@
 			};
 			name = Release;
 		};
+		DEE4616C189D274600E1D3E0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				PRODUCT_NAME = "testQueue copy";
+			};
+			name = Debug;
+		};
+		DEE4616D189D274600E1D3E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "testQueue copy";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -434,6 +514,15 @@
 			buildConfigurations = (
 				DE63F63E184AAC0A00CF2A52 /* Debug */,
 				DE63F63F184AAC0A00CF2A52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DEE4616B189D274600E1D3E0 /* Build configuration list for PBXNativeTarget "testMainRunLoop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DEE4616C189D274600E1D3E0 /* Debug */,
+				DEE4616D189D274600E1D3E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

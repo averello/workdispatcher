@@ -5,7 +5,7 @@
  *
  *  Created by @author George Boumis
  *  @date 2013/12/11.
- *	@version 1.0
+ *	@version 1.1
  *  @copyright Copyright (c) 2013 George Boumis <developer.george.boumis@gmail.com>. All rights reserved.
  *
  *  @defgroup wd Work Dispatch Module
@@ -13,6 +13,7 @@
  *	@mainpage Work Dispath Documentation
  *	@section intro_sec Introduction
  *	A little library in `C` for managing task with operations via an operation queue interface. See @ref wd for documentation of this library.
+ *	Please refer to (see [workdispatcher](https://github.com/averello/workdispatcher))
  */
 
 #ifndef workdipatcher_dispatch_h
@@ -119,7 +120,7 @@ void WDOperationRelease(WDOperation *operation);
 WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *queue);
 	
 /*!
- *  @fn void WDOperationRelease(WDOperation *operation)
+ *  @fn void WDOperationQueueRelease(WDOperationQueue *queue)
  *  @brief Decrements the retain count of a WDOperationQueue.
  *  @ingroup wd
  *	@param[in] queue the queue to release.
@@ -252,6 +253,31 @@ void WDOperationQueueSetName(WDOperationQueue *queue, const char *name);
  *	@returns The name of the operation queue.
  */
 const char * WDOperationQueueGetName(WDOperationQueue *queue);
+
+/*!
+ *  @fn WDOperationQueue *WDOperationQueueMainQueue()
+ *  @brief Returns the operation queue associated with the main thread.
+ *  @ingroup wd
+ *	@details The returned queue executes operations on the main thread.
+ *	@returns The default operation queue bound to the main thread.
+ *	@warning You should never call @ref WDOperationQueueRelease with the main queue, doing so will cause the application to crash.
+ */
+WDOperationQueue *WDOperationQueueMainQueue();
+
+/*!
+ *  @fn void WDOperationQueueMainQueueLoop()
+ *  @brief Start the main queues loop.
+ *  @ingroup wd
+ *	@details This function normally never returns. If you want to dispatch operations back to the main queue then you should probably do something like this
+ *	~~~~~~~~~~
+ *	int main(int argc, char *argv[]) {
+ *		...
+ *		return WDOperationQueueMainQueueLoop();
+ *	}
+ *	~~~~~~~~~~
+ *	@warning You should never use @ref WDOperationQueueMainQueue to dispatch operations back to the main queue if this function was not never called.
+ */
+int WDOperationQueueMainQueueLoop();
 	
 #ifdef _cplusplus
 }
