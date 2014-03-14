@@ -13,7 +13,7 @@
  *	@mainpage Work Dispath Documentation
  *	@section intro_sec Introduction
  *	A little library in `C` for managing task with operations via an operation queue interface. See @ref wd for documentation of this library.
- *	Please refer to (see [workdispatcher](https://github.com/averello/workdispatcher))
+ *	Please refer to [workdispatcher](https://github.com/averello/workdispatcher)
  */
 
 #ifndef workdipatcher_dispatch_h
