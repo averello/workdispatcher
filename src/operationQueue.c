@@ -3,7 +3,7 @@
  *
  *  Created by @author George Boumis
  *  @date 2013/12/11.
- *	@version 1.0
+ *	@version 1.1
  *  @copyright Copyright (c) 2013 George Boumis <developer.george.boumis@gmail.com>. All rights reserved.
  */
 
