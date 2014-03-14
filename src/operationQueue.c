@@ -1,10 +1,11 @@
-//
-//  operationQueue.c
-//  workdipatcher
-//
-//  Created by George Boumis on 11/12/13.
-//  Copyright (c) 2013 George Boumis <developer.george.boumis@gmail.com>. All rights reserved.
-//
+/*!
+ *  @file operationQueue.c
+ *
+ *  Created by @author George Boumis
+ *  @date 2013/12/11.
+ *	@version 1.0
+ *  @copyright Copyright (c) 2013 George Boumis <developer.george.boumis@gmail.com>. All rights reserved.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
