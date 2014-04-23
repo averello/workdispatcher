@@ -17,7 +17,7 @@ doxygen Doxyfile
 Dependencies
 ------------
 
-This library uses [libmemorymanagement](https://github.com/averello/memorymanagement) internally.
+This library uses [libmemorymanagement](https://github.com/averello/memorymanagement)(https://github.com/averello/memorymanagement) internally.
 
 
 Usage
