@@ -22,6 +22,8 @@
 #ifdef _cplusplus
 extern "C" {
 #endif
+    
+#include <stdbool.h>
 
 /*!
  *  @typedef struct _wd_operation_t WDOperation
@@ -65,24 +67,24 @@ typedef struct _wd_operation_queue_t WDOperationQueue;
  *  @ingroup wd
  */
 typedef struct _wd_operation_flags_t {
-	unsigned int canceled:1; /*!< The `canceled` flag lets clients know that the cancellation of an operation was requested. Support for cancellation is voluntary but encouraged and your own code. See also @ref [“Responding to the Cancel Command.”](@ref respondingToCancel) */
-	unsigned int finished:1; /*!< The `finished` flag lets clients know that an operation finished its task successfully or was cancelled and is exiting. */
-	unsigned int executing:1; /*!< The `executing` flag lets clients know whether the operation is actively working on its assigned task. */
+	bool canceled:1; /*!< The `canceled` flag lets clients know that the cancellation of an operation was requested. Support for cancellation is voluntary but encouraged and your own code. See also @ref [“Responding to the Cancel Command.”](@ref respondingToCancel) */
+	bool finished:1; /*!< The `finished` flag lets clients know that an operation finished its task successfully or was cancelled and is exiting. */
+	bool executing:1; /*!< The `executing` flag lets clients know whether the operation is actively working on its assigned task. */
 } wd_operation_flags_t;
 
 
 /*!
- *  @typedef typedef void (*wd_operation_f) (WDOperation *, void *)
+ *  @typedef typedef void (*wd_operation_f) (WDOperation *const , void *const)
  *  @brief The prororype of an operation's function.
  *  @ingroup wd
  *
  *	@param[in] operation the operation that executes this task
  *	@param[in,out] argument the argument that was used to create this operation. You can use this parameter as you please.
  */
-typedef void (*wd_operation_f) (WDOperation *operation, void *argument);
+typedef void (*wd_operation_f) (WDOperation *const operation, void *const argument);
 
 /*!
- *  @fn WDOperation *WDOperationCreate(const wd_operation_f function, void *restrict argument)
+ *  @fn WDOperation *WDOperationCreate(const wd_operation_f function, void *const argument)
  *  @brief Creates an operation.
  *  @ingroup wd
  *	@details The argument of the operation is retained (see [libmemorymanagement](https://github.com/averello/memorymanagement)). If the argument is not allocated (managed) by the [libmemorymanagement](https://github.com/averello/memorymanagement) then *you* have to make *sure* that this pointer does not gets freed before the execution of the operation by the operation queue.
@@ -90,46 +92,46 @@ typedef void (*wd_operation_f) (WDOperation *operation, void *argument);
  *	@param[in,out] argument the argument to pass when executing the operation's function
  *	@returns an initialized @ref WDOperation object.
  */
-WDOperation *WDOperationCreate(const wd_operation_f function, void *restrict argument);
+WDOperation *WDOperationCreate(const wd_operation_f function, void *const argument);
 
 /*!
- *  @fn WDOperation *WDOperationRetain(WDOperation *operation)
+ *  @fn WDOperation *WDOperationRetain(WDOperation *const operation)
  *  @brief Increments the retain count of a WDOperation.
  *  @ingroup wd
  *	@param[in] operation the operation to retain.
  *	@returns the same you passed in as the @a operation parameter.
  */
-WDOperation *WDOperationRetain(WDOperation *operation);
+WDOperation *WDOperationRetain(WDOperation *const operation);
 	
 /*!
- *  @fn void WDOperationRelease(WDOperation *operation)
+ *  @fn void WDOperationRelease(WDOperation *const operation)
  *  @brief Decrements the retain count of a WDOperation.
  *  @ingroup wd
  *	@param[in] operation the operation to release.
  *	@warning You should never release the operation from within its executing function. Doing so results in unexpected behavior and will probably crash the application.
  */
-void WDOperationRelease(WDOperation *operation);
+void WDOperationRelease(WDOperation *const operation);
 
 /*!
- *  @fn WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *queue)
+ *  @fn WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *const queue)
  *  @brief Increments the retain count of a WDOperationQueue.
  *  @ingroup wd
  *	@param[in] queue the operation to retain.
  *	@returns the same you passed in as the @a queue parameter.
  */
-WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *queue);
+WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *const queue);
 	
 /*!
- *  @fn void WDOperationQueueRelease(WDOperationQueue *queue)
+ *  @fn void WDOperationQueueRelease(WDOperationQueue *const queue)
  *  @brief Decrements the retain count of a WDOperationQueue.
  *  @ingroup wd
  *	@param[in] queue the queue to release.
  *	@warning You should never release the operation queue that executes an operation from within the operation. Doing so results in unexpected behavior and will probably crash the application.
  */
-void WDOperationQueueRelease(WDOperationQueue *queue);
+void WDOperationQueueRelease(WDOperationQueue *const queue);
 
 /*!
- *  @fn void WDOperationCancel(WDOperation *operation)
+ *  @fn void WDOperationCancel(WDOperation *const operation)
  *  @brief Advises the operation object that it should stop executing its task.
  *  @ingroup wd
  *	@details This function does not force your operation code to stop. Instead, it updates the object’s internal flags to reflect the change in state. If the operation has already finished executing, this function has no effect. Canceling an operation that is currently in an operation queue, but not yet executing, makes it possible to remove the operation from the queue sooner than usual.
@@ -137,30 +139,30 @@ void WDOperationQueueRelease(WDOperationQueue *queue);
  *	For more information on what you must do in your operation objects to support cancellation, see [“Responding to the Cancel Command.”](@ref respondingToCancel)
  *	@param[in] operation the operation to mark as canceled
  */
-void WDOperationCancel(WDOperation *operation);
+void WDOperationCancel(WDOperation *const operation);
 
 /*!
- *  @fn wd_operation_flags_t WDOperationGetFlags(WDOperation *operation)
+ *  @fn wd_operation_flags_t WDOperationGetFlags(WDOperation *const operation)
  *  @brief Returns a structure of flags that indicate the state of this operation.
  *  @ingroup wd
  *	@details See @ref wd_operation_flags_t for explication of different fields of this structure.
  *	@param[in] operation the operation whose flags are demanded
  *	@returns the flag structure
  */
-wd_operation_flags_t WDOperationGetFlags(WDOperation *operation);
+wd_operation_flags_t WDOperationGetFlags(WDOperation *const operation);
 
 /*!
- *  @fn WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *operation)
+ *  @fn WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *const operation)
  *  @brief Returns the operation queue that launched the current operation.
  *  @ingroup wd
  *	@details You can use this function from within a running operation function to get a reference to the operation queue that started it. Calling this function from outside the context of a running operation typically results in `NULL` being returned.
  *	@param[in] operation the operation that is running in the context of a queue
  *	@returns The operation queue that started the operation or `NULL` if the queue could not be determined
  */
-WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *operation);
+WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *const operation);
 
 /*!
- *  @fn void WDOperationWaitUntilFinished(WDOperation *operation)
+ *  @fn void WDOperationWaitUntilFinished(WDOperation *const operation)
  *  @brief Blocks execution of the current thread until the receiver finishes.
  *  @ingroup wd
  *	@details
@@ -169,7 +171,7 @@ WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *operation);
  *	A typical use for this function would be to call it from the code that created the operation in the first place. After submitting the operation to a queue, you would call this function to wait until that operation finished executing.
  *	@param[in] operation the operation that is running in the context of a queue
  */
-void WDOperationWaitUntilFinished(WDOperation *operation);
+void WDOperationWaitUntilFinished(WDOperation *const operation);
 
 
 
@@ -186,7 +188,7 @@ void WDOperationWaitUntilFinished(WDOperation *operation);
 WDOperationQueue *WDOperationQueueAllocate(void);
 
 /*!
- *  @fn int WDOperationQueueAddOperation(WDOperationQueue *restrict queue, WDOperation *restrict operation)
+ *  @fn int WDOperationQueueAddOperation(WDOperationQueue *const queue, WDOperation *const operation)
  *  @brief Adds the specified operation object to the queue.
  *  @ingroup wd
  *	@details This function can be called from a currently running operation. This function is thread-safe.
@@ -194,37 +196,37 @@ WDOperationQueue *WDOperationQueueAllocate(void);
  *	@param[in] operation The operation object to be added to the queue. In memory-managed applications, this object is retained by the operation queue (see [libmemorymanagement](https://github.com/averello/memorymanagement)).
  *	@returns a boolean indicating whether the operation was correctly submitted to the operation queue
  */
-int WDOperationQueueAddOperation(WDOperationQueue *restrict queue, WDOperation *restrict operation);
+bool WDOperationQueueAddOperation(WDOperationQueue *const queue, WDOperation *const operation);
 
 /*!
- *  @fn void WDOperationQueueSuspend(WDOperationQueue *restrict queue, int choice)
+ *  @fn void WDOperationQueueSuspend(WDOperationQueue *const queue, bool choice)
  *  @brief Modifies the execution of pending operations
  *  @ingroup wd
  *	@param[in] queue the operation queue
  *	@param[in] choice if true, the queue stops scheduling queued operations for execution. If false, the queue begins scheduling operations again.
  */
-void WDOperationQueueSuspend(WDOperationQueue *restrict queue, int choice);
+void WDOperationQueueSuspend(WDOperationQueue *const queue, const bool choice);
 
 /*!
- *  @fn int WDOperationQueueIsSuspended(WDOperationQueue *restrict queue)
+ *  @fn bool WDOperationQueueIsSuspended(WDOperationQueue *const queue)
  *  @brief Returns whether the queue is suspended or not.
  *  @ingroup wd
  *	@param[in] queue the operation queue
  *	@returns Returns a Boolean value indicating whether the receiver is scheduling queued operations for execution.
  */
-int WDOperationQueueIsSuspended(WDOperationQueue *restrict queue);
+bool WDOperationQueueIsSuspended(WDOperationQueue *const queue);
 
 /*!
- *  @fn void WDOperationQueueCancelAllOperations(WDOperationQueue *queue)
+ *  @fn void WDOperationQueueCancelAllOperations(WDOperationQueue *const queue)
  *  @brief Cancels all queued and executing operations.
  *  @ingroup wd
  *	@details This function sends a cancel message to all operations currently in the queue. Queued operations are cancelled before they begin executing. If an operation is already executing, it is up to that operation to recognize the cancellation and stop what it is doing.
  *	@param[in] queue the operation queue
  */
-void WDOperationQueueCancelAllOperations(WDOperationQueue *queue);
+void WDOperationQueueCancelAllOperations(WDOperationQueue *const queue);
 
 /*!
- *  @fn void WDOperationQueueWaitAllOperations(WDOperationQueue *queue)
+ *  @fn void WDOperationQueueWaitAllOperations(WDOperationQueue *const queue)
  *  @brief Blocks the current thread until all of the receiver’s queued and executing operations finish executing.
  *  @ingroup wd
  *	@details When called, this function blocks the current thread and waits for the receiver’s current and queued operations to finish executing. While the current thread is blocked, the receiver continues to launch already queued operations and monitor those that are executing. During this time, the current thread cannot add operations to the queue, *neither* other threads may. Once all of the pending operations are finished, this method returns.
@@ -232,27 +234,27 @@ void WDOperationQueueCancelAllOperations(WDOperationQueue *queue);
  *	If there are no operations in the queue, this method returns immediately.
  *	@param[in] queue the operation queue
  */
-void WDOperationQueueWaitAllOperations(WDOperationQueue *queue);
+void WDOperationQueueWaitAllOperations(WDOperationQueue *const queue);
 
 /*!
- *  @fn void WDOperationQueueSetName(WDOperationQueue *queue, const char *name)
+ *  @fn void WDOperationQueueSetName(WDOperationQueue *const queue, const char *const name)
  *  @brief Assigns the specified name to the opeartion queue.
  *  @ingroup wd
  *	@details Names provide a way for you to identify your operation queues at run time. Tools may also use this name to provide additional context during debugging or analysis of your code.
  *	@param[in] queue the operation queue
  *	@param[in] name the new name to associate with the operation queue.
  */
-void WDOperationQueueSetName(WDOperationQueue *queue, const char *name);
+void WDOperationQueueSetName(WDOperationQueue *const queue, const char *const name);
 
 /*!
- *  @fn const char * WDOperationQueueGetName(WDOperationQueue *queue)
+ *  @fn const char * WDOperationQueueGetName(WDOperationQueue *const queue)
  *  @brief Returns the name of the operation queue.
  *  @ingroup wd
  *	@details The default value of this string is “WDOperationQueue <id>”, where <id> is the memory address of the operation queue.
  *	@param[in] queue the operation queue
  *	@returns The name of the operation queue.
  */
-const char * WDOperationQueueGetName(WDOperationQueue *queue);
+const char *WDOperationQueueGetName(WDOperationQueue *const queue);
 
 /*!
  *  @fn WDOperationQueue *WDOperationQueueMainQueue()
@@ -262,10 +264,10 @@ const char * WDOperationQueueGetName(WDOperationQueue *queue);
  *	@returns The default operation queue bound to the main thread.
  *	@warning You should never call @ref WDOperationQueueRelease with the main queue, doing so will cause the application to crash.
  */
-WDOperationQueue *WDOperationQueueMainQueue();
+WDOperationQueue *WDOperationQueueMainQueue(void);
 
 /*!
- *  @fn void WDOperationQueueMainQueueLoop()
+ *  @fn bool WDOperationQueueMainQueueLoop()
  *  @brief Start the main queues loop.
  *  @ingroup wd
  *	@details This function normally never returns. If you want to dispatch operations back to the main queue then you should probably do something like this
@@ -277,7 +279,7 @@ WDOperationQueue *WDOperationQueueMainQueue();
  *	~~~~~~~~~~
  *	@warning You should never use @ref WDOperationQueueMainQueue to dispatch operations back to the main queue if this function was not never called.
  */
-int WDOperationQueueMainQueueLoop();
+bool WDOperationQueueMainQueueLoop(void);
 	
 #ifdef _cplusplus
 }
