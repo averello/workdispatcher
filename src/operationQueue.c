@@ -29,9 +29,11 @@ static void __initMainQueue(void) __attribute__((constructor));
 void WDOperationDealloc(void *const block) __attribute__((visibility("internal")));
 void WDOperationQueueDealloc(void *const queue) __attribute__((visibility("internal")));
 void *WDOperationQueueThreadF(void *args) __attribute__((visibility("internal")));
-WDOperation *WDOperationQueuePopOperation(WDOperationQueue *const queue) __attribute__((visibility("internal")));
-void WDOperationQueuePopAndPerform(WDOperationQueue *const queue) __attribute__((visibility("internal")));
-void WDOperationPerform(WDOperation *const block) __attribute__((visibility("internal")));
+WDOperation *WDOperationQueuePopOperation(WDOperationQueue *const queue) __attribute__((visibility("internal"))) WD_NONNULL;
+void WDOperationQueuePopAndPerform(WDOperationQueue *const queue) __attribute__((visibility("internal"))) WD_NONNULL;
+void WDOperationPerform(WDOperation *const block) __attribute__((visibility("internal"))) WD_NONNULL;
+
+void WDOperationQueueSuspendOrResume(WDOperationQueue *const queue, const bool choice) WD_NONNULL;
 
 /*!
  *  @struct _wd_operation_t
@@ -189,26 +191,32 @@ void WDOperationQueueDealloc(void *const _queue) {
 }
 
 WDOperationQueue *WDOperationQueueRetain(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return (WDOperationQueue *)NULL;
     }
+#endif
 	return retain(queue);
 }
 
 void WDOperationQueueRelease(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return;
     }
+#endif
 	release(queue);
 }
 
 void WDOperationQueueSetName(WDOperationQueue *const queue, const char *const name) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return;
     }
+#endif
     if (NULL != queue->name) {
         free((void *)queue->name);
         queue->name = (const char *)NULL;
@@ -217,10 +225,12 @@ void WDOperationQueueSetName(WDOperationQueue *const queue, const char *const na
 }
 
 const char *WDOperationQueueGetName(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return (const char *)NULL;
     }
+#endif
 	return queue->name;
 }
 
@@ -240,6 +250,7 @@ void *WDOperationQueueThreadF(void *args) {
 }
 
 bool WDOperationQueueAddOperation(WDOperationQueue *const restrict queue, WDOperation *const restrict operation) {
+#if NULLABILITY_CHECK
     if (queue == NULL) {
         errno = EINVAL;
         return false;
@@ -248,6 +259,7 @@ bool WDOperationQueueAddOperation(WDOperationQueue *const restrict queue, WDOper
         errno = EINVAL;
         return false;
     }
+#endif
     if (operation->queuef == NULL) {
         errno = EINVAL;
         return false;
@@ -306,11 +318,21 @@ bool WDOperationQueueAddOperation(WDOperationQueue *const restrict queue, WDOper
 	return true;
 }
 
-void WDOperationQueueSuspend(WDOperationQueue *const queue, const bool choice) {
+void WDOperationQueueResume(WDOperationQueue *const queue) {
+    WDOperationQueueSuspendOrResume(queue, false);
+}
+
+void WDOperationQueueSuspend(WDOperationQueue *const queue) {
+    WDOperationQueueSuspendOrResume(queue, true);
+}
+
+void WDOperationQueueSuspendOrResume(WDOperationQueue *const queue, const bool suspend) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return;
     }
+#endif
 	/* Cannot suspend the main queue */
     if (queue == &__mainQueue) {
         errno = EINVAL;
@@ -318,8 +340,8 @@ void WDOperationQueueSuspend(WDOperationQueue *const queue, const bool choice) {
     }
 	
 	pthread_mutex_lock(&queue->suspend.mutex);
-	if (choice != queue->flags.suspend) {
-        if (choice == true) {
+	if (suspend != queue->flags.suspend) {
+        if (suspend == true) {
             queue->flags.suspend = true;
         }
 		else {
@@ -335,18 +357,22 @@ void WDOperationQueueSuspend(WDOperationQueue *const queue, const bool choice) {
 }
 
 bool WDOperationQueueIsSuspended(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return false;
     }
+#endif
 	return (bool)queue->flags.suspend;
 }
 
 WDOperation *WDOperationQueuePopOperation(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
     if (queue == NULL) {
         errno = EINVAL;
         return (WDOperation *)NULL;
     }
+#endif
 	
 	pthread_mutex_lock(&(queue->guard.mutex));
     
@@ -386,20 +412,24 @@ WDOperation *WDOperationQueuePopOperation(WDOperationQueue *const queue) {
 }
 
 void WDOperationQueuePopAndPerform(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
 	if (queue == NULL) {
         errno = EINVAL;
         return;
     }
+#endif
 	WDOperation *const operation = WDOperationQueuePopOperation(queue);
 	WDOperationPerform(operation);
 	release(operation);
 }
 
 void WDOperationQueueCancelAllOperations(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return;
     }
+#endif
 	
 	pthread_mutex_lock(&queue->guard.mutex);
 	
@@ -412,10 +442,12 @@ void WDOperationQueueCancelAllOperations(WDOperationQueue *const queue) {
 }
 
 void WDOperationQueueWaitAllOperations(WDOperationQueue *const queue) {
+#if NULLABILITY_CHECK
     if (NULL == queue) {
         errno = EINVAL;
         return;
     }
+#endif
 	while (!TAILQ_EMPTY(&queue->operations)) {
 		struct _list_item *item = TAILQ_LAST(&queue->operations, ListHead);
 		WDOperationWaitUntilFinished(item->operation);
@@ -428,10 +460,12 @@ void WDOperationQueueWaitAllOperations(WDOperationQueue *const queue) {
 /**************/
 
 WDOperation *WDOperationCreate(const wd_operation_f function, void *const argument) {
+#if NULLABILITY_CHECK
     if (function == NULL) {
         errno = EINVAL;
         return (WDOperation *)NULL;
     }
+#endif
 	
 	WDOperation *const operation = MEMORY_MANAGEMENT_ALLOC(sizeof(WDOperation));
     if (operation == NULL) {
@@ -465,26 +499,32 @@ void WDOperationDealloc(void *const _operation) {
 }
 
 WDOperation *WDOperationRetain(WDOperation *const operation) {
+#if NULLABILITY_CHECK
     if (NULL == operation) {
         errno = EINVAL;
         return (WDOperation *)NULL;
     }
+#endif
 	return retain(operation);
 }
 
 void WDOperationRelease(WDOperation *const operation) {
+#if NULLABILITY_CHECK
     if (NULL == operation) {
         errno = EINVAL;
         return;
     }
+#endif
 	release(operation);
 }
 
 void WDOperationPerform(WDOperation *const operation) {
+#if NULLABILITY_CHECK
     if (operation == NULL) {
         errno = EINVAL;
         return;
     }
+#endif
     if (operation->queuef == NULL) {
         errno = EINVAL;
         return;
@@ -519,10 +559,12 @@ void WDOperationPerform(WDOperation *const operation) {
 }
 
 WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *const operation) {
+#if NULLABILITY_CHECK
     if (operation == NULL) {
         errno = EINVAL;
         return (WDOperationQueue *)NULL;
     }
+#endif
 	pthread_mutex_lock(&operation->guard.mutex);
 	WDOperationQueue *queue = operation->queue;
 	pthread_mutex_unlock(&operation->guard.mutex);
@@ -530,30 +572,35 @@ WDOperationQueue *WDOperationCurrentOperationQueue(WDOperation *const operation)
 }
 
 void WDOperationCancel(WDOperation *const operation) {
+#if NULLABILITY_CHECK
 	if (NULL == operation) {
         errno = EINVAL;
         return;
     }
+#endif
 	pthread_mutex_lock(&operation->guard.mutex);
     operation->flags.canceled = true;
 	pthread_mutex_unlock(&operation->guard.mutex);
 }
 
 wd_operation_flags_t WDOperationGetFlags(WDOperation *const operation) {
-	wd_operation_flags_t flags = { false, false, false };
+#if NULLABILITY_CHECK
     if (NULL == operation) {
         errno = EINVAL;
-        return flags;
+        return (wd_operation_flags_t){ false, false, false };;
     }
-	flags = operation->flags;
+#endif
+	const wd_operation_flags_t flags = operation->flags;
 	return flags;
 }
 
 void WDOperationWaitUntilFinished(WDOperation *const operation) {
+#if NULLABILITY_CHECK
     if (NULL == operation) {
         errno = EINVAL;
         return;
     }
+#endif
 	pthread_mutex_lock(&operation->wait.mutex);
 	/* Block if the operaiton is not finished */
     if (!operation->flags.finished) {

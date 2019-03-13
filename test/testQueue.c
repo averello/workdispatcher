@@ -17,30 +17,28 @@
 void opf(WDOperation *operation, void *arg);
 
 int main () {
-	char *string = "Hello world";
-	WDOperationQueue *operationQueue = WDOperationQueueAllocate();
+	char *const string = "Hello world";
+	WDOperationQueue *const operationQueue = WDOperationQueueAllocate();
 	WDOperationQueueSetName(operationQueue, "queue.name");
 	
-	for (unsigned int i=0; i<ITER; i++) {
-		WDOperation *operation = WDOperationCreate(opf, string);
+	for (unsigned int i=0U; i<ITER; i++) {
+		WDOperation *const operation = WDOperationCreate(opf, string);
 		WDOperationQueueAddOperation(operationQueue, operation);
 		release(operation);
 	}
-	
 	
 	WDOperationQueueWaitAllOperations(operationQueue);
 	
-	WDOperationQueueSuspend(operationQueue, 1);
+	WDOperationQueueSuspend(operationQueue);
 	WDOperation *fistoperation = NULL;
 	char *string2 = "hohohohho";
-	for (unsigned int i=0; i<ITER; i++) {
-		WDOperation *operation = WDOperationCreate(opf, string2);
+	for (unsigned int i=0U; i<ITER; i++) {
+		WDOperation *const operation = WDOperationCreate(opf, string2);
 		WDOperationQueueAddOperation(operationQueue, operation);
-		if (i==0) fistoperation = operation;
+        if (i==0U) { fistoperation = operation; }
 		release(operation);
 	}
-	
-	WDOperationQueueSuspend(operationQueue, 0);
+	WDOperationQueueResume(operationQueue);
 	WDOperationWaitUntilFinished(fistoperation);
 	release(operationQueue);
 //	memory_management_print_stats();
@@ -52,12 +50,12 @@ void opf(WDOperation *operation, void *arg) {
 	char *string = arg;
 	usleep(50000);
 	puts(string);
-	WDOperationQueue *queue = WDOperationCurrentOperationQueue(operation);
+	WDOperationQueue *const queue = WDOperationCurrentOperationQueue(operation);
 	puts(WDOperationQueueGetName(queue));
 	if (i++<ITER) {
-		WDOperation *operation = WDOperationCreate(opf, string);
-		WDOperationQueueAddOperation(queue, operation);
-		release(operation);
+		WDOperation *const new = WDOperationCreate(opf, string);
+		WDOperationQueueAddOperation(queue, new);
+		release(new);
 	}
 	return;
 }
